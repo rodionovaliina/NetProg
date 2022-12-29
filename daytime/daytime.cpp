@@ -19,30 +19,31 @@ int main ()
     };
     sockaddr_in * addr = new (sockaddr_in); //своя адресная структура
     addr->sin_family = AF_INET; // интернет протокол IPv4
-    addr->sin_port = htons(44214); // порт 44214
-    addr->sin_addr.s_addr = inet_addr("127.0.0.1"); // localhost
+    addr->sin_port = 0; // порт 44214
+    addr->sin_addr.s_addr = 0; // localhost
 
-    sockaddr_in * srv_addr = new (sockaddr_in); //адресная структура удаленного сервера
-    srv_addr->sin_family = AF_INET; // интернет протокол IPv4
-    srv_addr->sin_port = htons(13); // порт
-    srv_addr->sin_addr.s_addr = inet_addr("172.16.40.1"); // localhost
-
+    sockaddr_in * s_addr = new (sockaddr_in); //адресная структура удаленного сервера
+    s_addr->sin_family = AF_INET; // интернет протокол IPv4
+    s_addr->sin_port = htons(13); // порт
+    s_addr->sin_addr.s_addr = inet_addr("172.16.41.130"); // localhost
+    
+    char *buf = new char[512];
+    string str ("Сколько времени?\n");
+    int msg = str.length();
+    size_t length = str.copy(buf,msg);
+    
     int s = socket(AF_INET, SOCK_DGRAM, 0); // UDP
     if (s == -1) {
         cout << "Socket error\n";
         exit(1);
     }
-    char *buf = new char[1024];
-    string str ("Сколько времени?\n");
-    int msg = str.length();
-    size_t length = str.copy(buf,msg);
 
-    int rc = bind(s, (const sockaddr *) srv_addr, sizeof (sockaddr_in));
+    int rc = bind(s, (const sockaddr *) addr, sizeof (sockaddr_in));
     if (rc == -1) {
         cout << "Error\n";
         exit(1);
     }
-    rc = connect(s, (const sockaddr*) srv_addr, sizeof(sockaddr_in));
+    rc = connect(s, (const sockaddr*) s_addr, sizeof(sockaddr_in));
     if (rc == -1) {
         close(s);
         exit(1);
@@ -65,8 +66,7 @@ int main ()
     close(s);
 
     delete addr;
-    delete srv_addr;
+    delete s_addr;
     delete[] buf;
     return 0;
 }
-
